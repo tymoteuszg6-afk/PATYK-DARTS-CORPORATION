@@ -76,15 +76,20 @@
 
             const dane = XLSX.utils.sheet_to_json(arkusz, { range: zakres, header: 1 });
             const tabeleProcentowe = ["frekwencja", "dable", "bulla", "winrate"];
+            const doZaokraglenia = ["srednia", "avg", "first9"];
             
             let html = '<table><thead><tr><th>Zawodnik</th><th>Wynik</th></tr></thead><tbody>';
             
             dane.forEach(r => { 
                 if(r[0]) {
                     let wartosc = r[1] ?? 0;
+                    
                     if (tabeleProcentowe.includes(typ) && typeof wartosc === 'number' && wartosc <= 1) {
                         wartosc = Math.round(wartosc * 100) + "%";
+                    } else if (doZaokraglenia.includes(typ) && typeof wartosc === 'number') {
+                        wartosc = wartosc.toFixed(2);
                     }
+                    
                     html += `<tr><td>${r[0]}</td><td>${wartosc}</td></tr>`; 
                 }
             });
