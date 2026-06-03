@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patyk Darts Corporation</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #1a1a2e; color: #fff; max-width: 600px; margin: auto; }
+        h1 { text-align: center; color: #ff4d4d; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
+        .logo { display: block; margin: 0 auto 20px auto; max-width: 150px; border-radius: 50%; border: 3px solid #ff4d4d; }
+        select { width: 100%; padding: 15px; margin-bottom: 25px; font-size: 16px; border-radius: 10px; border: none; background: #16213e; color: white; cursor: pointer; }
+        .table-container { overflow-x: auto; background: #16213e; padding: 15px; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        table { width: 100%; border-collapse: collapse; min-width: 250px; }
+        th { padding: 12px; background: #ff4d4d; color: white; text-align: left; }
+        td { padding: 12px; border-bottom: 1px solid #0f3460; }
+        tr:hover { background: #0f3460; transition: 0.3s; }
+        td:last-child { font-weight: bold; color: #ff4d4d; text-align: right; }
+    </style>
+</head>
+<body>
+
+    <img src="logo.png" alt="Logo PDC" class="logo">
+    
+    <h1>PATYK DARTS CORPORATION</h1>
+
+    <select id="wybor">
+        <option value="glowna">Tabela Główna PDC</option>
+        <option value="mecze">Tabela za mecze</option>
+        <option value="wybrykowa">Tabela Wybrykowa</option>
+        <option value="minigier">Tabela Minigier</option>
+        <option value="frekwencja">Tabela Frekwencji</option>
+        <option value="srednia">Najwyższa Średnia</option>
+        <option value="dable">% Dabli</option>
+        <option value="checkout">Najwyższy Checkout</option>
+        <option value="lotka">Najszybsza Lotka</option>
+        <option value="avg">Średnia</option>
+        <option value="first9">Średnia pierwszych 9 lotek</option>
+        <option value="bulla">% Legów do bulla</option>
+        <option value="winrate">% Zwycięstw</option>
+    </select>
+
+    <div class="table-container" id="kontener">Ładowanie danych...</div>
+
+    <script>
+        let workbook;
+        
+        async function init() {
+            try {
+                const res = await fetch('data.xlsm');
+                const data = await res.arrayBuffer();
+                workbook = XLSX.read(data, { type: 'array' });
+                pokazTabele("glowna");
+            } catch (e) {
+                document.getElementById('kontener').innerHTML = "Błąd: Nie znaleziono pliku data.xlsm w folderze.";
+            }
+        }
+
+        function pokazTabele(typ) {
+            const arkusz = workbook.Sheets[workbook.SheetNames[0]];
+            let zakres = "";
+            
+            if(typ === "glowna") zakres = "B5:C13";
+            else if(typ === "mecze") zakres = "G5:H13";
+            else if(typ === "wybrykowa") zakres = "L5:M13";
+            else if(typ === "minigier") zakres = "Q5:R13";
+            else if(typ === "frekwencja") zakres = "V5:W13";
+            else if(typ === "srednia") zakres = "AA5:AB13";
+            else if(typ === "dable") zakres = "AF5:AG13";
+            else if(typ === "checkout") zakres = "B18:C26";
+            else if(typ === "lotka") zakres = "G18:H26";
+            else if(typ === "avg") zakres = "L18:M26";
+            else if(typ === "first9") zakres = "Q18:R26";
+            else if(typ === "bulla") zakres = "V18:W26";
+            else if(typ === "winrate") zakres = "AA18:AB26";
+
+            const dane = XLSX.utils.sheet_to_json(arkusz, { range: zakres, header: 1 });
+            const tabeleProcentowe = ["frekwencja", "dable", "bulla", "winrate"];
+            
+            let html = '<table><thead><tr><th>Zawodnik</th><th>Wynik</th></tr></thead><tbody>';
+            
+            dane.forEach(r => { 
+                if(r[0]) {
+                    let wartosc = r[1] ?? 0;
+                    if (tabeleProcentowe.includes(typ) && typeof wartosc === 'number' && wartosc <= 1) {
+                        wartosc = Math.round(wartosc * 100) + "%";
+                    }
+                    html += `<tr><td>${r[0]}</td><td>${wartosc}</td></tr>`; 
+                }
+            });
+            
+            html += '</tbody></table>';
+            document.getElementById('kontener').innerHTML = html;
+        }
+
+        document.getElementById('wybor').addEventListener('change', (e) => pokazTabele(e.target.value));
+        init();
+    </script>
+</body>
+</html>
