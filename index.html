@@ -28,7 +28,6 @@
         body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: var(--bg-color); color: var(--text-color); max-width: 600px; margin: auto; transition: background 0.3s, color 0.3s; }
         h1 { text-align: center; color: var(--accent-color); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
         
-        /* Opcja 3: Pulsowanie logo */
         @keyframes heartbeat {
             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 77, 77, 0.6); }
             70% { transform: scale(1.05); box-shadow: 0 0 15px 10px rgba(255, 77, 77, 0); }
@@ -61,10 +60,9 @@
 
         table { width: 100%; border-collapse: collapse; min-width: 250px; }
         th { padding: 12px; background: var(--accent-color); color: white; text-align: left; }
-        td { padding: 12px; border-bottom: 1px solid var(--border-color); transition: 0.3s; }
+        td { padding: 12px; border-bottom: 1px solid var(--border-color); transition: 0.3s; cursor: pointer; }
         td:last-child { font-weight: bold; color: var(--accent-color); text-align: right; }
 
-        /* Opcja 1: Wjeżdżanie wierszy */
         @keyframes slideIn {
             from { opacity: 0; transform: translateX(-40px); }
             to { opacity: 1; transform: translateX(0); }
@@ -76,7 +74,6 @@
             transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
         }
 
-        /* Opcja 4: Wypukły wiersz po najechaniu */
         tbody tr:hover { 
             transform: scale(1.02) translateY(-2px); 
             background-color: var(--row-hover); 
@@ -130,7 +127,53 @@
         });
 
         let workbook;
-        let odtwarzacz = new Audio('muzyka.mp3');
+        
+        // Zaktualizowana baza cytatów
+        const cytaty = {
+            "KRET": [
+                "Wystrzelał się", 
+                "Znowu z tym patykiem"
+            ],
+            "HERZYK": [
+                "Teraz bym trafił", 
+                "Zamknąć to sobie możesz okno"
+            ],
+            "WRÓBEL": [
+                "Gdzie jest moje piórko"
+            ]
+        };
+
+        // Liczniki dla zawodników z tekstami
+        const licznikiWypowiedzi = {
+            "KRET": 0,
+            "HERZYK": 0,
+            "WRÓBEL": 0
+        };
+
+        // Nasłuchiwanie kliknięć w tabeli
+        document.getElementById('kontener').addEventListener('click', (e) => {
+            const wiersz = e.target.closest('tr');
+            if (!wiersz) return;
+            
+            if (wiersz.closest('thead')) return;
+
+            const imieZawodnika = wiersz.cells[0].innerText.trim();
+            
+            if (cytaty[imieZawodnika]) {
+                const dlugoscListy = cytaty[imieZawodnika].length;
+                const aktualnyNumer = licznikiWypowiedzi[imieZawodnika] % dlugoscListy;
+                const tekstDoPowiedzenia = cytaty[imieZawodnika][aktualnyNumer];
+                
+                // Zwiększamy licznik
+                licznikiWypowiedzi[imieZawodnika]++;
+
+                window.speechSynthesis.cancel();
+                const komunikat = new SpeechSynthesisUtterance(tekstDoPowiedzenia);
+                komunikat.lang = 'pl-PL';
+                komunikat.rate = 1.0; 
+                window.speechSynthesis.speak(komunikat);
+            }
+        });
         
         async function init() {
             try {
@@ -143,14 +186,13 @@
             }
         }
 
-        // Opcja 2: Funkcja zliczająca liczby w czasie rzeczywistym
         function animujLiczby() {
             const komorki = document.querySelectorAll('.wartosc-wyniku');
             komorki.forEach(komorka => {
                 const docelowa = parseFloat(komorka.getAttribute('data-cel'));
                 const typ = komorka.getAttribute('data-typ');
                 
-                const czasTrwania = 800; // animacja trwa 0.8 sekundy
+                const czasTrwania = 800;
                 const krokCzasowy = 20; 
                 const lacznieKrokow = czasTrwania / krokCzasowy;
                 const wartoscKroku = docelowa / lacznieKrokow;
@@ -221,7 +263,7 @@
                                 <td class="wartosc-wyniku" data-cel="${cel}" data-typ="${typWartosci}">0</td>
                              </tr>`; 
                              
-                    opoznienie += 0.08; // Każdy następny wiersz pojawia się 0.08s później
+                    opoznienie += 0.08;
                 }
             });
             
@@ -230,20 +272,17 @@
             const kontener = document.getElementById('kontener');
             kontener.innerHTML = html;
             
-            // Uruchomienie animacji odliczania od zera
             animujLiczby();
             
             if (typ === 'bulla') {
                 kontener.classList.add('bulla-bg');
-                odtwarzacz.currentTime = 0; 
-                odtwarzacz.play().catch(() => console.log("Przeglądarka zablokowała autoodtwarzanie."));
             } else {
                 kontener.classList.remove('bulla-bg');
-                odtwarzacz.pause();
             }
         }
 
         document.getElementById('wybor').addEventListener('change', (e) => pokazTabele(e.target.value));
+        
         init();
     </script>
 </body>
