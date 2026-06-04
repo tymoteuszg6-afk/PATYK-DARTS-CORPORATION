@@ -35,6 +35,20 @@
         #theme-btn:hover { background: var(--row-hover); }
 
         .table-container { overflow-x: auto; background: var(--container-bg); padding: 15px; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: 0.3s; }
+        
+        .table-container.bulla-bg {
+            background-image: url('tlo.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .table-container.bulla-bg table {
+            background-color: rgba(22, 33, 62, 0.85);
+        }
+        body.light-mode .table-container.bulla-bg table {
+            background-color: rgba(255, 255, 255, 0.85);
+        }
+
         table { width: 100%; border-collapse: collapse; min-width: 250px; }
         th { padding: 12px; background: var(--accent-color); color: white; text-align: left; }
         td { padding: 12px; border-bottom: 1px solid var(--border-color); transition: 0.3s; }
@@ -133,7 +147,15 @@
             });
             
             html += '</tbody></table>';
-            document.getElementById('kontener').innerHTML = html;
+            
+            const kontener = document.getElementById('kontener');
+            kontener.innerHTML = html;
+            
+            if (typ === 'bulla') {
+                kontener.classList.add('bulla-bg');
+            } else {
+                kontener.classList.remove('bulla-bg');
+            }
         }
 
         document.getElementById('wybor').addEventListener('change', (e) => pokazTabele(e.target.value));
