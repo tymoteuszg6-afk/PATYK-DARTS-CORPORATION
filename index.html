@@ -7,19 +7,46 @@
     <link rel="icon" type="image/png" href="logo.png">
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: #1a1a2e; color: #fff; max-width: 600px; margin: auto; }
-        h1 { text-align: center; color: #ff4d4d; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
-        .logo { display: block; margin: 0 auto 20px auto; max-width: 150px; border-radius: 50%; border: 3px solid #ff4d4d; }
-        select { width: 100%; padding: 15px; margin-bottom: 25px; font-size: 16px; border-radius: 10px; border: none; background: #16213e; color: white; cursor: pointer; }
-        .table-container { overflow-x: auto; background: #16213e; padding: 15px; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        :root {
+            --bg-color: #1a1a2e;
+            --container-bg: #16213e;
+            --text-color: #fff;
+            --accent-color: #ff4d4d;
+            --row-hover: #0f3460;
+            --border-color: #0f3460;
+        }
+
+        body.light-mode {
+            --bg-color: #f4f4f9;
+            --container-bg: #ffffff;
+            --text-color: #333;
+            --accent-color: #d93838;
+            --row-hover: #f0f0f0;
+            --border-color: #ddd;
+        }
+
+        body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: var(--bg-color); color: var(--text-color); max-width: 600px; margin: auto; transition: background 0.3s, color 0.3s; }
+        h1 { text-align: center; color: var(--accent-color); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
+        .logo { display: block; margin: 0 auto 20px auto; max-width: 150px; border-radius: 50%; border: 3px solid var(--accent-color); }
+        select { width: 100%; padding: 15px; margin-bottom: 25px; font-size: 16px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--container-bg); color: var(--text-color); cursor: pointer; transition: 0.3s; }
+        
+        .top-bar { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+        #theme-btn { background: var(--container-bg); color: var(--text-color); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        #theme-btn:hover { background: var(--row-hover); }
+
+        .table-container { overflow-x: auto; background: var(--container-bg); padding: 15px; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: 0.3s; }
         table { width: 100%; border-collapse: collapse; min-width: 250px; }
-        th { padding: 12px; background: #ff4d4d; color: white; text-align: left; }
-        td { padding: 12px; border-bottom: 1px solid #0f3460; }
-        tr:hover { background: #0f3460; transition: 0.3s; }
-        td:last-child { font-weight: bold; color: #ff4d4d; text-align: right; }
+        th { padding: 12px; background: var(--accent-color); color: white; text-align: left; }
+        td { padding: 12px; border-bottom: 1px solid var(--border-color); transition: 0.3s; }
+        tr:hover td { background: var(--row-hover); }
+        td:last-child { font-weight: bold; color: var(--accent-color); text-align: right; }
     </style>
 </head>
 <body>
+
+    <div class="top-bar">
+        <button id="theme-btn">☀️ Jasny motyw</button>
+    </div>
 
     <img src="logo.png" alt="Logo PDC" class="logo">
     
@@ -44,6 +71,16 @@
     <div class="table-container" id="kontener">Ładowanie danych...</div>
 
     <script>
+        const themeBtn = document.getElementById('theme-btn');
+        themeBtn.addEventListener('click', () => {
+            document.body.classList.toggle('light-mode');
+            if (document.body.classList.contains('light-mode')) {
+                themeBtn.innerText = '🌙 Ciemny motyw';
+            } else {
+                themeBtn.innerText = '☀️ Jasny motyw';
+            }
+        });
+
         let workbook;
         
         async function init() {
