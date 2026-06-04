@@ -40,6 +40,15 @@
         td { padding: 12px; border-bottom: 1px solid var(--border-color); transition: 0.3s; }
         tr:hover td { background: var(--row-hover); }
         td:last-child { font-weight: bold; color: var(--accent-color); text-align: right; }
+
+        /* Stylizacja podium */
+        .gold td { background: rgba(255, 215, 0, 0.15); font-weight: bold; color: #ffd700; }
+        .silver td { background: rgba(192, 192, 192, 0.15); font-weight: bold; color: #c0c0c0; }
+        .bronze td { background: rgba(205, 127, 50, 0.15); font-weight: bold; color: #cd7f32; }
+        
+        body.light-mode .gold td { background: rgba(255, 215, 0, 0.3); color: #b8860b; }
+        body.light-mode .silver td { background: rgba(192, 192, 192, 0.3); color: #696969; }
+        body.light-mode .bronze td { background: rgba(205, 127, 50, 0.3); color: #8b4513; }
     </style>
 </head>
 <body>
@@ -117,6 +126,7 @@
             const doZaokraglenia = ["srednia", "avg", "first9"];
             
             let html = '<table><thead><tr><th>Zawodnik</th><th>Wynik</th></tr></thead><tbody>';
+            let pozycja = 1;
             
             dane.forEach(r => { 
                 if(r[0]) {
@@ -128,7 +138,15 @@
                         wartosc = wartosc.toFixed(2);
                     }
                     
-                    html += `<tr><td>${r[0]}</td><td>${wartosc}</td></tr>`; 
+                    let klasa = '';
+                    let medal = '';
+                    
+                    if (pozycja === 1) { klasa = 'gold'; medal = ' 🏆'; }
+                    else if (pozycja === 2) { klasa = 'silver'; medal = ' 🥈'; }
+                    else if (pozycja === 3) { klasa = 'bronze'; medal = ' 🥉'; }
+                    
+                    html += `<tr class="${klasa}"><td>${r[0]}${medal}</td><td>${wartosc}</td></tr>`; 
+                    pozycja++;
                 }
             });
             
