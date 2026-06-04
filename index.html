@@ -27,7 +27,15 @@
 
         body { font-family: 'Segoe UI', sans-serif; padding: 20px; background: var(--bg-color); color: var(--text-color); max-width: 600px; margin: auto; transition: background 0.3s, color 0.3s; }
         h1 { text-align: center; color: var(--accent-color); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 20px; }
-        .logo { display: block; margin: 0 auto 20px auto; max-width: 150px; border-radius: 50%; border: 3px solid var(--accent-color); }
+        
+        /* Opcja 3: Pulsowanie logo */
+        @keyframes heartbeat {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 77, 77, 0.6); }
+            70% { transform: scale(1.05); box-shadow: 0 0 15px 10px rgba(255, 77, 77, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 77, 77, 0); }
+        }
+        .logo { display: block; margin: 0 auto 20px auto; max-width: 150px; border-radius: 50%; border: 3px solid var(--accent-color); animation: heartbeat 2s infinite; }
+        
         select { width: 100%; padding: 15px; margin-bottom: 25px; font-size: 16px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--container-bg); color: var(--text-color); cursor: pointer; transition: 0.3s; }
         
         .top-bar { display: flex; justify-content: flex-end; margin-bottom: 10px; }
@@ -36,7 +44,6 @@
 
         .table-container { overflow-x: auto; background: var(--container-bg); padding: 15px; border-radius: 12px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: 0.3s; }
         
-        /* Animacja 7 zdjęć */
         @keyframes szybkieTla {
             0%   { background-image: url('tlo.jpg'); }
             14%  { background-image: url('tlo2.jpg'); }
@@ -48,26 +55,39 @@
             100% { background-image: url('tlo.jpg'); }
         }
 
-        .table-container.bulla-bg {
-            animation: szybkieTla 0.9s infinite;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-        }
-        
-        .table-container.bulla-bg table {
-            background-color: rgba(22, 33, 62, 0.85);
-        }
-        
-        body.light-mode .table-container.bulla-bg table {
-            background-color: rgba(255, 255, 255, 0.85);
-        }
+        .table-container.bulla-bg { animation: szybkieTla 0.9s infinite; background-size: cover; background-position: center; background-repeat: no-repeat; }
+        .table-container.bulla-bg table { background-color: rgba(22, 33, 62, 0.85); }
+        body.light-mode .table-container.bulla-bg table { background-color: rgba(255, 255, 255, 0.85); }
 
         table { width: 100%; border-collapse: collapse; min-width: 250px; }
         th { padding: 12px; background: var(--accent-color); color: white; text-align: left; }
         td { padding: 12px; border-bottom: 1px solid var(--border-color); transition: 0.3s; }
-        tr:hover td { background: var(--row-hover); }
         td:last-child { font-weight: bold; color: var(--accent-color); text-align: right; }
+
+        /* Opcja 1: Wjeżdżanie wierszy */
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-40px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        tbody tr { 
+            opacity: 0; 
+            animation: slideIn 0.4s ease forwards; 
+            transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        /* Opcja 4: Wypukły wiersz po najechaniu */
+        tbody tr:hover { 
+            transform: scale(1.02) translateY(-2px); 
+            background-color: var(--row-hover); 
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4); 
+            position: relative; 
+            z-index: 10; 
+        }
+        body.light-mode tbody tr:hover {
+            box-shadow: 0 8px 15px rgba(0,0,0,0.15);
+        }
+        tbody tr:hover td { border-bottom-color: transparent; }
     </style>
 </head>
 <body>
@@ -123,6 +143,41 @@
             }
         }
 
+        // Opcja 2: Funkcja zliczająca liczby w czasie rzeczywistym
+        function animujLiczby() {
+            const komorki = document.querySelectorAll('.wartosc-wyniku');
+            komorki.forEach(komorka => {
+                const docelowa = parseFloat(komorka.getAttribute('data-cel'));
+                const typ = komorka.getAttribute('data-typ');
+                
+                const czasTrwania = 800; // animacja trwa 0.8 sekundy
+                const krokCzasowy = 20; 
+                const lacznieKrokow = czasTrwania / krokCzasowy;
+                const wartoscKroku = docelowa / lacznieKrokow;
+                
+                let aktualna = 0;
+                let licznik = 0;
+
+                const animacja = setInterval(() => {
+                    licznik++;
+                    aktualna += wartoscKroku;
+                    
+                    if (licznik >= lacznieKrokow || aktualna >= docelowa) {
+                        aktualna = docelowa;
+                        clearInterval(animacja);
+                    }
+                    
+                    if (typ === 'procent') {
+                        komorka.innerText = Math.round(aktualna) + "%";
+                    } else if (typ === 'dziesietny') {
+                        komorka.innerText = aktualna.toFixed(2);
+                    } else {
+                        komorka.innerText = Math.round(aktualna);
+                    }
+                }, krokCzasowy);
+            });
+        }
+
         function pokazTabele(typ) {
             const arkusz = workbook.Sheets[workbook.SheetNames[0]];
             let zakres = "";
@@ -146,18 +201,27 @@
             const doZaokraglenia = ["srednia", "avg", "first9"];
             
             let html = '<table><thead><tr><th>Zawodnik</th><th>Wynik</th></tr></thead><tbody>';
+            let opoznienie = 0;
             
             dane.forEach(r => { 
                 if(r[0]) {
                     let wartosc = r[1] ?? 0;
+                    let typWartosci = 'zwykly';
+                    let cel = wartosc;
                     
                     if (tabeleProcentowe.includes(typ) && typeof wartosc === 'number' && wartosc <= 1) {
-                        wartosc = Math.round(wartosc * 100) + "%";
+                        typWartosci = 'procent';
+                        cel = wartosc * 100;
                     } else if (doZaokraglenia.includes(typ) && typeof wartosc === 'number') {
-                        wartosc = wartosc.toFixed(2);
+                        typWartosci = 'dziesietny';
                     }
                     
-                    html += `<tr><td>${r[0]}</td><td>${wartosc}</td></tr>`; 
+                    html += `<tr style="animation-delay: ${opoznienie}s">
+                                <td>${r[0]}</td>
+                                <td class="wartosc-wyniku" data-cel="${cel}" data-typ="${typWartosci}">0</td>
+                             </tr>`; 
+                             
+                    opoznienie += 0.08; // Każdy następny wiersz pojawia się 0.08s później
                 }
             });
             
@@ -165,6 +229,9 @@
             
             const kontener = document.getElementById('kontener');
             kontener.innerHTML = html;
+            
+            // Uruchomienie animacji odliczania od zera
+            animujLiczby();
             
             if (typ === 'bulla') {
                 kontener.classList.add('bulla-bg');
