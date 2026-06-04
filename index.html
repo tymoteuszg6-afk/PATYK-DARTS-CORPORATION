@@ -127,23 +127,25 @@
         });
 
         let workbook;
+        let odtwarzaczTla = new Audio('muzyka.mp3');
+        let odtwarzaczGlosow = new Audio();
         
-        // Zaktualizowana baza cytatów
-        const cytaty = {
+        // Zaktualizowana baza plików dźwiękowych
+        const sciezkiDzwiekow = {
             "KRET": [
-                "Wystrzelał się", 
-                "Znowu z tym patykiem"
+                "kret1.mp3", 
+                "kret2.mp3"
             ],
             "HERZYK": [
-                "Teraz bym trafił", 
-                "Zamknąć to sobie możesz okno"
+                "herzyk1.mp3", 
+                "herzyk2.mp3"
             ],
             "WRÓBEL": [
-                "Gdzie jest moje piórko"
+                "wróbel.mp3"
             ]
         };
 
-        // Liczniki dla zawodników z tekstami
+        // Liczniki do naprzemiennego odtwarzania
         const licznikiWypowiedzi = {
             "KRET": 0,
             "HERZYK": 0,
@@ -159,19 +161,17 @@
 
             const imieZawodnika = wiersz.cells[0].innerText.trim();
             
-            if (cytaty[imieZawodnika]) {
-                const dlugoscListy = cytaty[imieZawodnika].length;
+            if (sciezkiDzwiekow[imieZawodnika]) {
+                const dlugoscListy = sciezkiDzwiekow[imieZawodnika].length;
                 const aktualnyNumer = licznikiWypowiedzi[imieZawodnika] % dlugoscListy;
-                const tekstDoPowiedzenia = cytaty[imieZawodnika][aktualnyNumer];
+                const nazwaPliku = sciezkiDzwiekow[imieZawodnika][aktualnyNumer];
                 
                 // Zwiększamy licznik
                 licznikiWypowiedzi[imieZawodnika]++;
 
-                window.speechSynthesis.cancel();
-                const komunikat = new SpeechSynthesisUtterance(tekstDoPowiedzenia);
-                komunikat.lang = 'pl-PL';
-                komunikat.rate = 1.0; 
-                window.speechSynthesis.speak(komunikat);
+                // Odtwarzanie pliku MP3
+                odtwarzaczGlosow.src = nazwaPliku;
+                odtwarzaczGlosow.play().catch(() => console.log("Przeglądarka zablokowała autoodtwarzanie głosów."));
             }
         });
         
@@ -276,8 +276,11 @@
             
             if (typ === 'bulla') {
                 kontener.classList.add('bulla-bg');
+                odtwarzaczTla.currentTime = 0; 
+                odtwarzaczTla.play().catch(() => console.log("Zablokowano autoodtwarzanie."));
             } else {
                 kontener.classList.remove('bulla-bg');
+                odtwarzaczTla.pause();
             }
         }
 
