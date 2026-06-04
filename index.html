@@ -96,6 +96,7 @@
         });
 
         let workbook;
+        let odtwarzacz = new Audio('muzyka.mp3');
         
         async function init() {
             try {
@@ -153,8 +154,11 @@
             
             if (typ === 'bulla') {
                 kontener.classList.add('bulla-bg');
+                odtwarzacz.currentTime = 0; 
+                odtwarzacz.play().catch(() => console.log("Przeglądarka zablokowała autoodtwarzanie."));
             } else {
                 kontener.classList.remove('bulla-bg');
+                odtwarzacz.pause();
             }
         }
 
