@@ -130,7 +130,6 @@
         let odtwarzaczTla = new Audio('muzyka.mp3');
         let odtwarzaczGlosow = new Audio();
         
-        // Zaktualizowana baza plików dźwiękowych
         const sciezkiDzwiekow = {
             "KRET": [
                 "kret1.mp3", 
@@ -145,14 +144,12 @@
             ]
         };
 
-        // Liczniki do naprzemiennego odtwarzania
         const licznikiWypowiedzi = {
             "KRET": 0,
             "HERZYK": 0,
             "WRÓBEL": 0
         };
 
-        // Nasłuchiwanie kliknięć w tabeli
         document.getElementById('kontener').addEventListener('click', (e) => {
             const wiersz = e.target.closest('tr');
             if (!wiersz) return;
@@ -166,10 +163,8 @@
                 const aktualnyNumer = licznikiWypowiedzi[imieZawodnika] % dlugoscListy;
                 const nazwaPliku = sciezkiDzwiekow[imieZawodnika][aktualnyNumer];
                 
-                // Zwiększamy licznik
                 licznikiWypowiedzi[imieZawodnika]++;
 
-                // Odtwarzanie pliku MP3
                 odtwarzaczGlosow.src = nazwaPliku;
                 odtwarzaczGlosow.play().catch(() => console.log("Przeglądarka zablokowała autoodtwarzanie głosów."));
             }
@@ -177,7 +172,8 @@
         
         async function init() {
             try {
-                const res = await fetch('data.xlsm');
+                const url = 'data.xlsm?v=' + new Date().getTime();
+                const res = await fetch(url);
                 const data = await res.arrayBuffer();
                 workbook = XLSX.read(data, { type: 'array' });
                 pokazTabele("glowna");
